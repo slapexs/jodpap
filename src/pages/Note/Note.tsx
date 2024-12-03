@@ -1,39 +1,16 @@
-import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { MainLayout } from "@/layouts/MainLayout/MainLayout";
 
 export default function Note() {
 	const { signOut } = useAuth();
 
 	return (
 		<>
-			Note
-			<Dialog>
-				<DialogTrigger asChild>
-					<Button type="button">Logout</Button>
-				</DialogTrigger>
-
-				<DialogContent className="max-w-[350px]">
-					<DialogHeader>
-						<DialogTitle>ออกจากระบบ</DialogTitle>
-						<DialogDescription>ยืนยันว่าจะออกจากระบบ?</DialogDescription>
-					</DialogHeader>
-
-					<DialogFooter>
-						<Button type="button" onClick={signOut}>
-							ตกลง
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<MainLayout>
+				<div className="w-full mt-5">
+					<h1 className="text-5xl font-semibold">จดไว้แล้ว</h1>
+				</div>
+			</MainLayout>
 		</>
 	);
 }

@@ -9,27 +9,30 @@ import { AuthProvider } from "./contexts/AuthContext.tsx";
 import { ProtectedRoute } from "./contexts/ProtectedRoute.tsx";
 import Note from "./pages/Note/Note.tsx";
 import Register from "./pages/Register/Register.tsx";
+import { ThemeProvider } from "./components/theme-provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<AuthProvider>
 		<StrictMode>
 			<Toaster />
-			<BrowserRouter>
-				<Routes>
-					<Route path="/" element={<App />} />
+			<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+				<BrowserRouter>
+					<Routes>
+						<Route path="/" element={<App />} />
 
-					<Route path="/login" element={<Login />} />
-					<Route
-						path="/note"
-						element={
-							<ProtectedRoute>
-								<Note />
-							</ProtectedRoute>
-						}
-					/>
-					<Route path="/register" element={<Register />} />
-				</Routes>
-			</BrowserRouter>
+						<Route path="/login" element={<Login />} />
+						<Route
+							path="/note"
+							element={
+								<ProtectedRoute>
+									<Note />
+								</ProtectedRoute>
+							}
+						/>
+						<Route path="/register" element={<Register />} />
+					</Routes>
+				</BrowserRouter>
+			</ThemeProvider>
 		</StrictMode>
 	</AuthProvider>
 );

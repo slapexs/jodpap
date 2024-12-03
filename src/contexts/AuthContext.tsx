@@ -1,6 +1,7 @@
 import { supabase } from "@/middlewares/supabase";
 import { AuthContextType } from "@/types/auth";
 import { User } from "@/types/user";
+import { getUserProfile } from "@/utils/user";
 import { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext<AuthContextType>({
@@ -20,8 +21,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 	useEffect(() => {
 		const getUserSession = async () => {
 			const { data, error } = await supabase.auth.getSession();
+
+			if (error) throw error;
+
 			if (data.session) {
-				setUser({ id: data.session.user.id, email: data.session.user.email! });
+				const userProfile = await getUserProfile(data.session.user.id);
+				setUser(userProfile);
 				setIsAuthenticated(true);
 			} else {
 				setUser(null);
@@ -41,9 +46,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		});
 
 		if (error) throw error;
-
-		const userData = { id: data.user.id, email: data.user.email! };
-		setUser(userData);
+		const userProfile = await getUserProfile(data.session.user.id);
+		setUser(userProfile);
 		setIsAuthenticated(true);
 	};
 
@@ -51,9 +55,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		await supabase.auth.signOut();
 		setUser(null);
 		setIsAuthenticated(false);
+		localStorage.clear();
 	};
 
-	// TODO
 	const signUp = async (email: string, password: string, name: string) => {
 		const { data, error: signUpError } = await supabase.auth.signUp({
 			email,
@@ -68,17 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 			.from("users")
 			.insert({ id: data.user?.id, email, name });
 		if (insertError) throw insertError;
-	};
-
-	const fetchUserDetails = async (userId: string): Promise<User> => {
-		const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
-
-		if (error) throw error;
-
-		return {
-			id: data.id,
-			email: data.email,
-		};
 	};
 
 	return (
