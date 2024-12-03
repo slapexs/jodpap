@@ -7,22 +7,31 @@ export const AuthContext = createContext<AuthContextType>({
 	user: null,
 	signIn: async () => {},
 	signOut: async () => {},
+	signUp: async () => {},
 	isAuthenticated: false,
+	isLoading: false,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const userData = localStorage.getItem("userData");
-		if (userData) {
-			setUser(JSON.parse(userData));
-			setIsAuthenticated(true);
-		} else {
-			setUser(null);
-			setIsAuthenticated(false);
-		}
+		const getUserSession = async () => {
+			const { data, error } = await supabase.auth.getSession();
+			if (data.session) {
+				setUser({ id: data.session.user.id, email: data.session.user.email! });
+				setIsAuthenticated(true);
+			} else {
+				setUser(null);
+				setIsAuthenticated(false);
+			}
+		};
+
+		getUserSession().finally(() => {
+			setIsLoading(false);
+		});
 	}, []);
 
 	const signIn = async (email: string, password: string) => {
@@ -34,7 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		if (error) throw error;
 
 		const userData = { id: data.user.id, email: data.user.email! };
-		localStorage.setItem("userData", JSON.stringify(userData));
 		setUser(userData);
 		setIsAuthenticated(true);
 	};
@@ -46,7 +54,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 	};
 
 	// TODO
-	const signUp = async (userData: User) => {};
+	const signUp = async (email: string, password: string, name: string) => {
+		const { data, error: signUpError } = await supabase.auth.signUp({
+			email,
+			password,
+			options: {
+				emailRedirectTo: window.location.origin + "/login",
+			},
+		});
+		if (signUpError) throw signUpError;
+
+		const { data: insertData, error: insertError } = await supabase
+			.from("users")
+			.insert({ id: data.user?.id, email, name });
+		if (insertError) throw insertError;
+	};
 
 	const fetchUserDetails = async (userId: string): Promise<User> => {
 		const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
@@ -59,6 +81,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		};
 	};
 
-	return <AuthContext.Provider value={{ user, signIn, signOut, isAuthenticated }}>{children}</AuthContext.Provider>;
+	return (
+		<AuthContext.Provider value={{ user, signIn, signOut, isAuthenticated, isLoading, signUp }}>
+			{children}
+		</AuthContext.Provider>
+	);
 };
 

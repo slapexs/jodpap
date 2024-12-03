@@ -13,30 +13,48 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-export default function Login() {
+export default function Register() {
 	const { toast } = useToast();
 	const navigate = useNavigate();
-	const { signIn } = useAuth();
+	const { signUp } = useAuth();
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
-	const formSchema = z.object({
-		email: z.string().email("กรอกอีเมลให้ถูกต้องด้วย"),
-		password: z.string().min(6, "รหัสผ่านต้องยาวอย่างน้อย 6 ตัว").max(50, "รหัสผ่านยาวได้ไม่เกิน 50 ตัว"),
-	});
+	const formSchema = z
+		.object({
+			email: z.string().email("กรอกอีเมลให้ถูกต้องด้วย"),
+			name: z
+				.string({ message: "บอกหน่อยให้เราเรียกคุณว่าอะไร" })
+				.min(3, "ชื่อต้องยาวอย่างน้อย 3 ตัว")
+				.max(25, "ชื่อยาวได้ไม่เกิน 25 ตัว"),
+			password: z.string().min(6, "รหัสผ่านต้องยาวอย่างน้อย 6 ตัว").max(50, "รหัสผ่านยาวได้ไม่เกิน 50 ตัว"),
+			confirmPassword: z
+				.string()
+				.min(6, "รหัสผ่านต้องยาวอย่างน้อย 6 ตัว")
+				.max(50, "รหัสผ่านยาวได้ไม่เกิน 50 ตัว"),
+		})
+		.refine((data) => data.password === data.confirmPassword, {
+			message: "รหัสผ่านไม่ตรงกัน",
+			path: ["confirmPassword"],
+		});
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			email: "",
+			name: "",
 			password: "",
+			confirmPassword: "",
 		},
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setIsLoading(true);
 		try {
-			await signIn(values.email, values.password);
-			navigate("/note");
+			await signUp(values.email, values.password, values.name);
+			toast({ title: "สร้างบัญชีเรียบร้อย!", description: "กรุณาเช็คอีเมลเพื่อยืนยันบัญชี", duration: 4000 });
+			setTimeout(() => {
+				navigate("/login");
+			}, 4000);
 		} catch (error) {
 			toast({ title: "เอ๊ะ!", description: (error as Error).message, duration: 3500, variant: "destructive" });
 		}
@@ -48,8 +66,8 @@ export default function Login() {
 			<main className="min-h-screen w-full flex items-center">
 				<Card className="w-full min-w-[350px]">
 					<CardHeader>
-						<CardTitle>ล็อกอิน</CardTitle>
-						<CardDescription>บอกเราหน่อยคุณคือใคร?</CardDescription>
+						<CardTitle>สร้างบัญชี</CardTitle>
+						<CardDescription>โปรดใช้อีเมลที่ใช้งานจริงจะดีที่สุด</CardDescription>
 					</CardHeader>
 
 					<Form {...form}>
@@ -81,6 +99,32 @@ export default function Login() {
 										</FormItem>
 									)}
 								/>
+								<FormField
+									control={form.control}
+									name="confirmPassword"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>ยืนยันรหัสผ่าน</FormLabel>
+											<FormControl>
+												<Input placeholder="************" type="password" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>ชื่อเล่น</FormLabel>
+											<FormControl>
+												<Input placeholder="Jenny" type="text" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</CardContent>
 
 							<CardFooter className="block text-center">
@@ -89,8 +133,8 @@ export default function Login() {
 									ตกลง
 								</Button>
 								<p className="mt-4">
-									<span className="text-neutral-400">ยังไม่มีบัญชีใช่ไหม?</span>{" "}
-									<Link to={"/register"}>สร้างบัญชี</Link>
+									<span className="text-neutral-400">มีบัญชีแล้วใช่ไหม?</span>{" "}
+									<Link to={"/login"}>ล็อกอิน</Link>
 								</p>
 							</CardFooter>
 						</form>

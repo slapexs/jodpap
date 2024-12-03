@@ -8,6 +8,7 @@ import { Toaster } from "./components/ui/toaster.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import { ProtectedRoute } from "./contexts/ProtectedRoute.tsx";
 import Note from "./pages/Note/Note.tsx";
+import Register from "./pages/Register/Register.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<AuthProvider>
@@ -26,6 +27,7 @@ createRoot(document.getElementById("root")!).render(
 							</ProtectedRoute>
 						}
 					/>
+					<Route path="/register" element={<Register />} />
 				</Routes>
 			</BrowserRouter>
 		</StrictMode>
