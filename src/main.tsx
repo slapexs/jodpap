@@ -10,6 +10,8 @@ import { ProtectedRoute } from "./contexts/ProtectedRoute.tsx";
 import Note from "./pages/Note/Note.tsx";
 import Register from "./pages/Register/Register.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
+import Setting from "./pages/Setting/Setting.tsx";
+import Profile from "./pages/Profile/Profile.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<AuthProvider>
@@ -30,6 +32,22 @@ createRoot(document.getElementById("root")!).render(
 							}
 						/>
 						<Route path="/register" element={<Register />} />
+						<Route
+							path="/setting"
+							element={
+								<ProtectedRoute>
+									<Setting />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/profile"
+							element={
+								<ProtectedRoute>
+									<Profile />
+								</ProtectedRoute>
+							}
+						/>
 					</Routes>
 				</BrowserRouter>
 			</ThemeProvider>

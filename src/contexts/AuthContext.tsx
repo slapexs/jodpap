@@ -11,29 +11,29 @@ export const AuthContext = createContext<AuthContextType>({
 	signUp: async () => {},
 	isAuthenticated: false,
 	isLoading: false,
+	getUserSession: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const getUserSession = async () => {
+		const { data, error } = await supabase.auth.getSession();
+
+		if (error) throw error;
+
+		if (data.session) {
+			const userProfile = await getUserProfile(data.session.user.id);
+			setUser(userProfile);
+			setIsAuthenticated(true);
+		} else {
+			setUser(null);
+			setIsAuthenticated(false);
+		}
+	};
 
 	useEffect(() => {
-		const getUserSession = async () => {
-			const { data, error } = await supabase.auth.getSession();
-
-			if (error) throw error;
-
-			if (data.session) {
-				const userProfile = await getUserProfile(data.session.user.id);
-				setUser(userProfile);
-				setIsAuthenticated(true);
-			} else {
-				setUser(null);
-				setIsAuthenticated(false);
-			}
-		};
-
 		getUserSession().finally(() => {
 			setIsLoading(false);
 		});
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 	};
 
 	return (
-		<AuthContext.Provider value={{ user, signIn, signOut, isAuthenticated, isLoading, signUp }}>
+		<AuthContext.Provider value={{ user, signIn, signOut, isAuthenticated, isLoading, signUp, getUserSession }}>
 			{children}
 		</AuthContext.Provider>
 	);

@@ -7,5 +7,6 @@ export interface AuthContextType {
 	signOut: () => Promise<void>;
 	isAuthenticated: boolean;
 	isLoading: boolean;
+	getUserSession: () => void;
 }
 
