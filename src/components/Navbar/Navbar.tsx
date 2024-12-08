@@ -39,7 +39,7 @@ export default function Navbar() {
 			<div>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button type="button" variant="outline">
+						<Button type="button" variant="secondary">
 							<Menu />
 						</Button>
 					</DropdownMenuTrigger>
