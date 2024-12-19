@@ -3,15 +3,17 @@ import Friend from "@/components/Friend/Friend";
 import Recent from "@/components/Recent/Recent";
 import Summary from "@/components/Summary/Summary";
 import { Button } from "@/components/ui/button";
+import useFriend from "@/hooks/useFriend";
 import { MainLayout } from "@/layouts/MainLayout/MainLayout";
 
 export default function Note() {
+	const { friends, isLoading } = useFriend();
 	return (
 		<>
 			<MainLayout>
 				<Summary />
 				<div className="w-full gap-10 grid">
-					<Friend />
+					<Friend friends={friends} isLoading={isLoading} />
 					<Recent />
 
 					<Category />

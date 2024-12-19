@@ -18,29 +18,40 @@ import {
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import { Link } from "react-router";
+import { ArrowLeftIcon, Menu } from "lucide-react";
+import { Link, useLocation } from "react-router";
 
 export default function Navbar() {
 	const { user, signOut } = useAuth();
+	const location = useLocation();
 	return (
 		<nav className="flex justify-between py-5 px-4 bg-secondary">
-			<div className="flex items-center gap-3">
-				<Avatar>
-					<AvatarImage
-						src={`${
-							import.meta.env.VITE_SUPABASE_PROJECT_URL
-						}/storage/v1/object/public/user_image_profile/${user?.image_profile}`}
-						alt="avatar"
-					/>
-					<AvatarFallback>{user?.name}</AvatarFallback>
-				</Avatar>
+			{location.pathname === "/note" ? (
+				<div className="flex items-center gap-3">
+					<Avatar>
+						<AvatarImage
+							src={`${
+								import.meta.env.VITE_SUPABASE_PROJECT_URL
+							}/storage/v1/object/public/user_image_profile/${user?.image_profile}`}
+							alt="avatar"
+						/>
+						<AvatarFallback>{user?.name}</AvatarFallback>
+					</Avatar>
 
-				<div className="grid">
-					<small className="text-muted-foreground">สวัสดี</small>
-					<p>{user?.name}</p>
+					<div className="grid">
+						<small className="text-muted-foreground">สวัสดี</small>
+						<p>{user?.name}</p>
+					</div>
 				</div>
-			</div>
+			) : (
+				<div className="flex items-center gap-3">
+					<Button type="button" variant={"outline"} size={"icon"} asChild>
+						<Link to={"/note"}>
+							<ArrowLeftIcon />
+						</Link>
+					</Button>
+				</div>
+			)}
 
 			<div>
 				<DropdownMenu>

@@ -12,6 +12,8 @@ import Register from "./pages/Register/Register.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import Setting from "./pages/Setting/Setting.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
+import FriendList from "./pages/Friend/FriendList.tsx";
+import SearchFriend from "./pages/Friend/SearchFriend.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<AuthProvider>
@@ -45,6 +47,23 @@ createRoot(document.getElementById("root")!).render(
 							element={
 								<ProtectedRoute>
 									<Profile />
+								</ProtectedRoute>
+							}
+						/>
+
+						<Route
+							path="/friend"
+							element={
+								<ProtectedRoute>
+									<FriendList />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/search-friend"
+							element={
+								<ProtectedRoute>
+									<SearchFriend />
 								</ProtectedRoute>
 							}
 						/>

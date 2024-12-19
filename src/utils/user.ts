@@ -8,3 +8,21 @@ export const getUserProfile = async (id: string) => {
 	return data[0];
 };
 
+export const addFriend = async (userId: string, friendId: string) => {
+	const { error } = await supabase
+		.from("friends")
+		.insert([
+			{
+				user_id: userId,
+				friend_id: friendId,
+			},
+		])
+		.select();
+	if (error) throw error;
+};
+
+export const deleteFriend = async (friendId: string) => {
+	const { error } = await supabase.from("friends").delete().eq("id", friendId);
+	if (error) throw error;
+};
+
