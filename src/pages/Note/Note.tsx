@@ -28,7 +28,7 @@ export default function Note() {
 						asChild
 					>
 						<Link to={"/add-note"}>
-							<PlusIcon /> จดบันทึก
+							<PlusIcon /> เพิ่มบันทึก
 						</Link>
 					</Button>
 				</div>

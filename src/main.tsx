@@ -24,7 +24,14 @@ createRoot(document.getElementById("root")!).render(
 			<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
 				<BrowserRouter>
 					<Routes>
-						<Route path="/" element={<App />} />
+						<Route
+							path="/"
+							element={
+								<ProtectedRoute>
+									<Note />
+								</ProtectedRoute>
+							}
+						/>
 
 						<Route path="/login" element={<Login />} />
 						<Route
