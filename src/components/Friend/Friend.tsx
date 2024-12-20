@@ -1,10 +1,13 @@
-import { Avatar, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { UserPlusIcon } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import Loading from "../Loading/Loading";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
+import useFriend from "@/hooks/useFriend";
+import { friendStatusEnum } from "@/enums/friend";
+import { useEffect, useState } from "react";
 
 interface IFriendProps {
 	friends: User[];
@@ -12,13 +15,27 @@ interface IFriendProps {
 }
 
 export default function Friend({ friends, isLoading }: IFriendProps) {
+	const { getFriendWithStatus } = useFriend();
+	const [pendingFriendCount, setPendingFriendCount] = useState<number>(0);
+
+	const pendingFriendsCount = async () => {
+		const pendingFriend = await getFriendWithStatus(friendStatusEnum.PENDING);
+		setPendingFriendCount(pendingFriend?.length ?? 0);
+	};
+
+	useEffect(() => {
+		pendingFriendsCount();
+	}, []);
 	return (
 		<div className="rounded-lg shadow px-3 py-2">
 			<div className="flex justify-between">
 				<h1 className="font-semibold">เพื่อน</h1>
 				<Link to={"/search-friend"}>
-					<Button type="button" variant={"secondary"} size={"icon"}>
+					<Button type="button" variant={"outline"} size={"icon"} className="relative">
 						<UserPlusIcon />
+						{pendingFriendCount > 0 && (
+							<div className="absolute -top-2 -right-2 bg-red-500 w-4 h-4 rounded-full"></div>
+						)}
 					</Button>
 				</Link>
 			</div>

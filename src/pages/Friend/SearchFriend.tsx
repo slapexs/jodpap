@@ -20,12 +20,10 @@ import { friendStatusEnum } from "@/enums/friend.ts";
 import { IFriendResult } from "@/types/friend.ts";
 import { User } from "@/types/user.ts";
 import NewFriendRequest from "@/components/Friend/NewFriendRequest";
-import useFriend from "@/hooks/useFriend";
 
 export default function SearchFriend() {
 	const { user } = useAuth();
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const { getFriendWithStatus } = useFriend();
 	const [addIsLoading, setAddIsLoading] = useState<boolean>(false);
 	const [isShowList, setIsShowList] = useState<boolean>(false);
 	const [pendingFriends, setPendingFriends] = useState<User[]>([]);
@@ -129,6 +127,9 @@ export default function SearchFriend() {
 			return [...updatedFriends, ...newFriends];
 		});
 	};
+	const trigger = (userId: string) => {
+		setPendingFriends((prevFriend) => prevFriend.filter((friend) => friend.id !== userId));
+	};
 
 	useEffect(() => {
 		getPendingFriends();
@@ -210,7 +211,7 @@ export default function SearchFriend() {
 						)}
 					</div>
 				) : (
-					<NewFriendRequest friends={pendingFriends} />
+					<NewFriendRequest friends={pendingFriends} triggerLoadPendingFriend={trigger} />
 				)
 			) : (
 				<Loading />

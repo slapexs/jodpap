@@ -9,9 +9,10 @@ import { friendStatusEnum } from "@/enums/friend";
 
 interface INewFriendRequest {
 	friends: User[];
+	triggerLoadPendingFriend: (userId: string) => void;
 }
 
-export default function NewFriendRequest({ friends }: INewFriendRequest) {
+export default function NewFriendRequest({ friends, triggerLoadPendingFriend }: INewFriendRequest) {
 	const acceptFriend = async (friendId: string) => {
 		await supabase
 			.from("user_friends")
@@ -19,10 +20,12 @@ export default function NewFriendRequest({ friends }: INewFriendRequest) {
 				status: friendStatusEnum.ACCEPTED,
 			})
 			.or(`user_id.eq.${friendId},friend_id.eq.${friendId}`);
+		triggerLoadPendingFriend(friendId);
 	};
 
 	const declineFriend = async (friendId: string) => {
 		await supabase.from("user_friends").delete().or(`user_id.eq.${friendId},friend_id.eq.${friendId}`);
+		triggerLoadPendingFriend(friendId);
 	};
 
 	return (

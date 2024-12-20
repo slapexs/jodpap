@@ -22,7 +22,10 @@ export const addFriend = async (userId: string, friendId: string) => {
 };
 
 export const deleteFriend = async (friendId: string) => {
-	const { error } = await supabase.from("friends").delete().eq("id", friendId);
+	const { error } = await supabase
+		.from("user_friends")
+		.delete()
+		.or(`user_id.eq.${friendId},friend_id.eq.${friendId}`);
 	if (error) throw error;
 };
 
