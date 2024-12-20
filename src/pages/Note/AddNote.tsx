@@ -22,17 +22,22 @@ import { INoteCategory } from "@/types/transaction";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/middlewares/supabase";
 import { useNavigate } from "react-router";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AddNote() {
 	const { friends } = useFriend();
+	const { user } = useAuth();
 	const [noteCategory, setNoteCategory] = useState<INoteCategory[]>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const navigate = useNavigate();
 
+	const floatRegex = /^-?\d+(\.\d+)?$/;
 	const formSchema = z.object({
 		friendId: z.string({ message: "เลือกเพื่อนด้วย" }).min(3, "เลือกเพื่อนด้วย"),
 		date: z.date({ message: "ระบุวันที่ด้วย" }),
-		amount: z.string({ message: "ระบุจำนวนด้วย" }).min(1, "ระบุจำนวนด้วย").max(7),
+		amount: z.string({ message: "ระบุจำนวนด้วย" }).min(1, "ระบุจำนวนด้วย").max(7).regex(floatRegex, {
+			message: "ระบุจำนวนให้ถูกต้องเช่น 100 หรือ 100.24",
+		}),
 		categoryId: z.string().optional(),
 		note: z.string().min(3, "ระบุไว้หน่อยว่าค่าอะไร"),
 	});
@@ -52,7 +57,9 @@ export default function AddNote() {
 		const { amount, date, friendId, note, categoryId } = values;
 		setIsLoading(true);
 		try {
-			await supabase.from("notes").insert({ amount, date, friend_id: friendId, note, category_id: categoryId });
+			await supabase
+				.from("notes")
+				.insert({ amount, date, friend_id: friendId, note, category_id: categoryId, user_id: user!.id });
 			toast({ title: "เย้!", description: "บันทึกโน๊ตใหม่เรียบร้อย" });
 			setTimeout(() => {
 				navigate(`/friend/${friendId}`);
@@ -184,7 +191,7 @@ export default function AddNote() {
 									<FormItem className="">
 										<FormLabel>จำนวน</FormLabel>
 										<FormControl>
-											<Input placeholder="200" type="number" min={0} max={9999999} {...field} />
+											<Input placeholder="200" type="text" min={0} max={9999999} {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>

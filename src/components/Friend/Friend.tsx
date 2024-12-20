@@ -5,9 +5,11 @@ import { Link } from "react-router";
 import Loading from "../Loading/Loading";
 import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
-import useFriend from "@/hooks/useFriend";
 import { friendStatusEnum } from "@/enums/friend";
 import { useEffect, useState } from "react";
+import { supabase } from "@/middlewares/supabase";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 interface IFriendProps {
 	friends: User[];
@@ -15,12 +17,31 @@ interface IFriendProps {
 }
 
 export default function Friend({ friends, isLoading }: IFriendProps) {
-	const { getFriendWithStatus } = useFriend();
+	const { user } = useAuth();
 	const [pendingFriendCount, setPendingFriendCount] = useState<number>(0);
 
 	const pendingFriendsCount = async () => {
-		const pendingFriend = await getFriendWithStatus(friendStatusEnum.PENDING);
-		setPendingFriendCount(pendingFriend?.length ?? 0);
+		try {
+			const { data } = await supabase
+				.from("user_friends")
+				.select("friend_id")
+				.eq("friend_id", user!.id)
+				.neq("who_add_id", user!.id)
+				.eq("status", friendStatusEnum.PENDING);
+
+			const friendIdList: string[] = [];
+
+			data?.forEach((id) => friendIdList.push(id.friend_id));
+
+			const { data: friendUser } = await supabase
+				.from("users")
+				.select("id, name, email, image_profile")
+				.in("id", friendIdList);
+			setPendingFriendCount(friendUser?.length ?? 0);
+			return friendUser;
+		} catch (error) {
+			toast({ title: "เอ๊ะ!", description: (error as Error).message, duration: 3500, variant: "destructive" });
+		}
 	};
 
 	useEffect(() => {
@@ -45,9 +66,9 @@ export default function Friend({ friends, isLoading }: IFriendProps) {
 			) : (
 				<section className="flex gap-3">
 					{friends.length > 0 ? (
-						friends.map((friend, index) => (
-							<Link to={`/friend/${friend.id}`}>
-								<div className="flex justify-center flex-col items-center w-fit" key={index}>
+						friends.map((friend) => (
+							<Link to={`/friend/${friend.id}`} key={friend.id}>
+								<div className="flex justify-center flex-col items-center w-fit">
 									<Avatar className="mt-1">
 										<AvatarImage
 											src={`${
