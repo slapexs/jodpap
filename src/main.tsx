@@ -14,6 +14,8 @@ import Setting from "./pages/Setting/Setting.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
 import FriendList from "./pages/Friend/FriendList.tsx";
 import SearchFriend from "./pages/Friend/SearchFriend.tsx";
+import AddNote from "./pages/Note/AddNote.tsx";
+import NoteFriend from "./pages/Friend/NoteFriend.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<AuthProvider>
@@ -52,7 +54,7 @@ createRoot(document.getElementById("root")!).render(
 						/>
 
 						<Route
-							path="/friend"
+							path="/friends"
 							element={
 								<ProtectedRoute>
 									<FriendList />
@@ -64,6 +66,22 @@ createRoot(document.getElementById("root")!).render(
 							element={
 								<ProtectedRoute>
 									<SearchFriend />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/add-note"
+							element={
+								<ProtectedRoute>
+									<AddNote />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/friend/:friendId"
+							element={
+								<ProtectedRoute>
+									<NoteFriend />
 								</ProtectedRoute>
 							}
 						/>

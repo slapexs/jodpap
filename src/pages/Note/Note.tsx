@@ -5,6 +5,7 @@ import Summary from "@/components/Summary/Summary";
 import { Button } from "@/components/ui/button";
 import useFriend from "@/hooks/useFriend";
 import { MainLayout } from "@/layouts/MainLayout/MainLayout";
+import { Link } from "react-router";
 
 export default function Note() {
 	const { friends, isLoading } = useFriend();
@@ -18,8 +19,8 @@ export default function Note() {
 
 					<Category />
 
-					<Button type="button" variant={"default"} size={"lg"} className="rounded-full">
-						จดบันทึก
+					<Button type="button" variant={"default"} size={"lg"} className="rounded-full" asChild>
+						<Link to={"/add-note"}>จดบันทึก</Link>
 					</Button>
 				</div>
 			</MainLayout>

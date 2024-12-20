@@ -24,6 +24,7 @@ import { MainLayout } from "@/layouts/MainLayout/MainLayout";
 import { deleteFriend } from "@/utils/user";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 
 export default function FriendList() {
 	const { friends, isLoading, getUserFriends } = useFriend();
@@ -51,7 +52,9 @@ export default function FriendList() {
 										/>
 									</Avatar>
 									<div className="flex flex-col">
-										<Label className="text-md">{u.name}</Label>
+										<Link to={`/friend/${u.id}`}>
+											<Label className="text-md">{u.name}</Label>
+										</Link>
 									</div>
 								</div>
 

@@ -46,17 +46,19 @@ export default function Friend({ friends, isLoading }: IFriendProps) {
 				<section className="flex gap-3">
 					{friends.length > 0 ? (
 						friends.map((friend, index) => (
-							<div className="flex justify-center flex-col items-center w-fit" key={index}>
-								<Avatar className="mt-1">
-									<AvatarImage
-										src={`${
-											import.meta.env.VITE_SUPABASE_PROJECT_URL
-										}/storage/v1/object/public/user_image_profile/${friend.image_profile}`}
-										alt="avatar"
-									/>
-								</Avatar>
-								<Label className="mt-1">{friend.name ?? "-"}</Label>
-							</div>
+							<Link to={`/friend/${friend.id}`}>
+								<div className="flex justify-center flex-col items-center w-fit" key={index}>
+									<Avatar className="mt-1">
+										<AvatarImage
+											src={`${
+												import.meta.env.VITE_SUPABASE_PROJECT_URL
+											}/storage/v1/object/public/user_image_profile/${friend.image_profile}`}
+											alt="avatar"
+										/>
+									</Avatar>
+									<Label className="mt-1">{friend.name ?? "-"}</Label>
+								</div>
+							</Link>
 						))
 					) : (
 						<p className="text-gray-400 text-center">ว่างเปล่า</p>
@@ -65,7 +67,7 @@ export default function Friend({ friends, isLoading }: IFriendProps) {
 			)}
 
 			<p className="text-center text-slate-500 text-sm mt-2">
-				<Link to={"/friend"}>ดูทั้งหมด</Link>
+				<Link to={"/friends"}>ดูทั้งหมด</Link>
 			</p>
 		</div>
 	);
