@@ -1,4 +1,3 @@
-import avatar from "@/assets/avatar.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import {
