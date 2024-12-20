@@ -82,18 +82,10 @@ export default function Profile() {
 						/>
 					</CardContent>
 
-					<CardFooter className="fixed bottom-0 left-0 right-0 p-4">
-						<Button
-							type="submit"
-							variant={"default"}
-							className="rounded-full w-full mx-2"
-							size={"lg"}
-							disabled={isLoading}
-						>
-							{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-							ตกลง
-						</Button>
-					</CardFooter>
+					<Button type="submit" variant={"default"} size={"lg"} className="mt-4 w-full" disabled={isLoading}>
+						{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+						ตกลง
+					</Button>
 				</form>
 			</Form>
 		</MainLayout>

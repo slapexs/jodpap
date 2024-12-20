@@ -1,26 +1,35 @@
-import Category from "@/components/Category/Category";
 import Friend from "@/components/Friend/Friend";
-import Recent from "@/components/Recent/Recent";
 import Summary from "@/components/Summary/Summary";
 import { Button } from "@/components/ui/button";
 import useFriend from "@/hooks/useFriend";
+import useNote from "@/hooks/useNote";
 import { MainLayout } from "@/layouts/MainLayout/MainLayout";
+import { PlusIcon } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Note() {
 	const { friends, isLoading } = useFriend();
+	const { amount, noteAmount } = useNote();
 	return (
 		<>
 			<MainLayout>
-				<Summary />
+				<Summary amount={amount} noteAmount={noteAmount} />
 				<div className="w-full gap-10 grid">
 					<Friend friends={friends} isLoading={isLoading} />
-					<Recent />
+					{/* <Recent />
 
-					<Category />
+					<Category /> */}
 
-					<Button type="button" variant={"default"} size={"lg"} className="rounded-full" asChild>
-						<Link to={"/add-note"}>จดบันทึก</Link>
+					<Button
+						type="button"
+						variant={"default"}
+						size={"lg"}
+						className="rounded-full fixed bottom-10 mx-2 right-5"
+						asChild
+					>
+						<Link to={"/add-note"}>
+							<PlusIcon /> จดบันทึก
+						</Link>
 					</Button>
 				</div>
 			</MainLayout>

@@ -64,7 +64,7 @@ export default function Friend({ friends, isLoading }: IFriendProps) {
 			{isLoading ? (
 				<Loading />
 			) : (
-				<section className="flex gap-3">
+				<section className="grid grid-cols-5">
 					{friends.length > 0 ? (
 						friends.map((friend) => (
 							<Link to={`/friend/${friend.id}`} key={friend.id}>
@@ -87,7 +87,7 @@ export default function Friend({ friends, isLoading }: IFriendProps) {
 				</section>
 			)}
 
-			<p className="text-center text-slate-500 text-sm mt-2">
+			<p className="text-center text-sm mt-2">
 				<Link to={"/friends"}>ดูทั้งหมด</Link>
 			</p>
 		</div>
