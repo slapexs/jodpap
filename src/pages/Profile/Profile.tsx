@@ -86,7 +86,7 @@ export default function Profile() {
 						<Button
 							type="submit"
 							variant={"default"}
-							className="rounded-full w-full"
+							className="rounded-full w-full mx-2"
 							size={"lg"}
 							disabled={isLoading}
 						>
