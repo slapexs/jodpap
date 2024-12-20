@@ -10,11 +10,9 @@ import { z } from "zod";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Check, ChevronsUpDown, Loader2Icon } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useFriend from "@/hooks/useFriend";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useEffect, useState } from "react";
 import { getNoteCategories } from "@/utils/transaction";
@@ -34,7 +32,7 @@ export default function AddNote() {
 	const floatRegex = /^-?\d+(\.\d+)?$/;
 	const formSchema = z.object({
 		friendId: z.string({ message: "เลือกเพื่อนด้วย" }).min(3, "เลือกเพื่อนด้วย"),
-		date: z.date({ message: "ระบุวันที่ด้วย" }),
+		date: z.string({ message: "ระบุวันที่ด้วย" }),
 		amount: z.string({ message: "ระบุจำนวนด้วย" }).min(1, "ระบุจำนวนด้วย").max(7).regex(floatRegex, {
 			message: "ระบุจำนวนให้ถูกต้องเช่น 100 หรือ 100.24",
 		}),
@@ -46,7 +44,7 @@ export default function AddNote() {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			friendId: "",
-			date: new Date(),
+			date: "",
 			amount: "",
 			categoryId: "d283f7ad-f1a4-46a1-b19f-24d48d618edd",
 			note: "",
@@ -146,39 +144,11 @@ export default function AddNote() {
 								control={form.control}
 								name="date"
 								render={({ field }) => (
-									<FormItem className="flex  flex-col">
+									<FormItem className="flex flex-col">
 										<FormLabel>วันที่ยืม</FormLabel>
-										<Popover>
-											<PopoverTrigger asChild>
-												<FormControl>
-													<Button
-														variant={"outline"}
-														className={cn(
-															"w-full pl-3 text-left font-normal",
-															!field.value && "text-muted-foreground"
-														)}
-													>
-														{field.value ? (
-															format(field.value, "dd-MM-yyyy")
-														) : (
-															<span>Pick a date</span>
-														)}
-														<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-													</Button>
-												</FormControl>
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0" align="start">
-												<Calendar
-													mode="single"
-													selected={field.value}
-													onSelect={field.onChange}
-													disabled={(date) =>
-														date > new Date() || date < new Date("1900-01-01")
-													}
-													initialFocus
-												/>
-											</PopoverContent>
-										</Popover>
+										<FormControl>
+											<Input type="date" {...field} />
+										</FormControl>
 										<FormMessage />
 									</FormItem>
 								)}
