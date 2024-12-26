@@ -25,7 +25,7 @@ export default function Navbar() {
 	const location = useLocation();
 	return (
 		<nav className="flex justify-between py-5 px-4 bg-secondary sticky top-0">
-			{location.pathname === "/note" ? (
+			{location.pathname === "/note" || location.pathname === "/" ? (
 				<div className="flex items-center gap-3">
 					<Avatar>
 						<AvatarImage src={user?.image_profile} alt="avatar" />
