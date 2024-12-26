@@ -170,12 +170,7 @@ export default function SearchFriend() {
 								<div key={u.user.id} className="my-1 py-1 flex justify-between items-center">
 									<div className="flex gap-3 items-center">
 										<Avatar>
-											<AvatarImage
-												src={`${
-													import.meta.env.VITE_SUPABASE_PROJECT_URL
-												}/storage/v1/object/public/user_image_profile/${u.user.image_profile}`}
-												alt="avatar"
-											/>
+											<AvatarImage src={u.user.image_profile} alt="avatar" />
 										</Avatar>
 										<div className="flex flex-col">
 											<Label className="text-md">{u.user.name}</Label>

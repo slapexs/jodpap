@@ -43,12 +43,7 @@ export default function FriendList() {
 							<div key={u.id} className="my-1 py-2 flex justify-between items-center">
 								<div className="flex gap-3 items-center">
 									<Avatar>
-										<AvatarImage
-											src={`${
-												import.meta.env.VITE_SUPABASE_PROJECT_URL
-											}/storage/v1/object/public/user_image_profile/${u.image_profile}`}
-											alt="avatar"
-										/>
+										<AvatarImage src={u.image_profile} alt="avatar" />
 									</Avatar>
 									<div className="flex flex-col">
 										<Link to={`/friend/${u.id}`}>
