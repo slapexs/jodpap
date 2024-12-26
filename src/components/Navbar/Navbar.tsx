@@ -28,12 +28,7 @@ export default function Navbar() {
 			{location.pathname === "/note" ? (
 				<div className="flex items-center gap-3">
 					<Avatar>
-						<AvatarImage
-							src={`${
-								import.meta.env.VITE_SUPABASE_PROJECT_URL
-							}/storage/v1/object/public/user_image_profile/${user?.image_profile}`}
-							alt="avatar"
-						/>
+						<AvatarImage src={user?.image_profile} alt="avatar" />
 						<AvatarFallback>{user?.name}</AvatarFallback>
 					</Avatar>
 

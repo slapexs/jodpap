@@ -37,12 +37,7 @@ export default function NewFriendRequest({ friends, triggerLoadPendingFriend }: 
 					<div key={u.id} className="my-1 py-1 flex justify-between items-center">
 						<div className="flex gap-3 items-center">
 							<Avatar>
-								<AvatarImage
-									src={`${
-										import.meta.env.VITE_SUPABASE_PROJECT_URL
-									}/storage/v1/object/public/user_image_profile/${u.image_profile}`}
-									alt="avatar"
-								/>
+								<AvatarImage src={u.image_profile} alt="avatar" />
 							</Avatar>
 							<div className="flex flex-col">
 								<Label className="text-md">{u.name}</Label>

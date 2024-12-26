@@ -70,12 +70,7 @@ export default function Friend({ friends, isLoading }: IFriendProps) {
 							<Link to={`/friend/${friend.id}`} key={friend.id}>
 								<div className="flex justify-center flex-col items-center w-fit">
 									<Avatar className="mt-1">
-										<AvatarImage
-											src={`${
-												import.meta.env.VITE_SUPABASE_PROJECT_URL
-											}/storage/v1/object/public/user_image_profile/${friend.image_profile}`}
-											alt="avatar"
-										/>
+										<AvatarImage src={friend.image_profile} alt="avatar" />
 									</Avatar>
 									<Label className="mt-1">{friend.name ?? "-"}</Label>
 								</div>

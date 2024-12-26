@@ -15,6 +15,7 @@ import FriendList from "./pages/Friend/FriendList.tsx";
 import SearchFriend from "./pages/Friend/SearchFriend.tsx";
 import AddNote from "./pages/Note/AddNote.tsx";
 import NoteFriend from "./pages/Friend/NoteFriend.tsx";
+import PaySlip from "./pages/Note/PaySlip.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<AuthProvider>
@@ -38,6 +39,14 @@ createRoot(document.getElementById("root")!).render(
 							element={
 								<ProtectedRoute>
 									<Note />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/note/payslip/:noteId"
+							element={
+								<ProtectedRoute>
+									<PaySlip />
 								</ProtectedRoute>
 							}
 						/>
