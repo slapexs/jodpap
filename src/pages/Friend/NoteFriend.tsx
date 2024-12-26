@@ -4,7 +4,7 @@ import useUser from "@/hooks/useUser";
 import { MainLayout } from "@/layouts/MainLayout/MainLayout";
 import { supabase } from "@/middlewares/supabase";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
 import { Calendar1Icon, CoinsIcon, FolderOpenIcon, HandCoinsIcon, Loader2Icon } from "lucide-react";
@@ -18,9 +18,25 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { formatCurrency } from "@/utils/transaction";
+import { formatCurrency, uploadPaySlip } from "@/utils/transaction";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+} from "@/components/ui/drawer";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "@/hooks/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 export default function NoteFriend() {
 	const { getUserById, user: friendUser } = useUser();
@@ -28,7 +44,56 @@ export default function NoteFriend() {
 	const params = useParams();
 	const [borrowList, setBorrowList] = useState<any[]>([]);
 	const [returnList, setReturnList] = useState<any[]>([]);
+
 	const [isPaidReturnLoading, setIsPaidReturnLoading] = useState<boolean>(false);
+	const formSchema = z.object({
+		noteId: z.string(),
+		paySlip: z
+			.any()
+			.refine((file) => file instanceof File, {
+				message: "โปรดอัพโหลดไฟล์ที่ถูกต้อง",
+			})
+			.refine((file) => file.size <= 5 * 1024 * 1024, {
+				message: "ไฟล์ต้องมีขนาดไม่เกิน 5MB",
+			})
+			.refine((file) => ["image/jpeg", "image/png"].includes(file.type), {
+				message: "รองรับเฉพาะไฟล์ประเภท JPEG, PNG",
+			}),
+	});
+
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			noteId: "",
+			paySlip: undefined,
+		},
+	});
+
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		setIsPaidReturnLoading(true);
+		try {
+			const filePath: string | undefined =
+				values.paySlip !== undefined ? await uploadPaySlip(values.paySlip) : undefined;
+			await supabase
+				.from("notes")
+				.update([
+					{
+						isPaid: true,
+						pay_slip: filePath,
+						paid_at: new Date(),
+					},
+				])
+				.eq("id", values.noteId);
+			toast({ title: "เย้!", description: "คืนเงินเรียบร้อย" });
+		} catch (error) {
+			toast({ title: "เอ๊ะ!", description: (error as Error).message, duration: 3500, variant: "destructive" });
+		}
+
+		setTimeout(() => {
+			setIsPaidReturnLoading(false);
+			getBorrowNotes();
+		}, 1000);
+	};
 
 	const getBorrowNotes = async () => {
 		const { data } = await supabase
@@ -36,7 +101,6 @@ export default function NoteFriend() {
 			.select("*, users:friend_id (name, image_profile), note_categories:category_id (name)")
 			.eq("user_id", user!.id)
 			.eq("friend_id", params.friendId)
-			.eq("isPaid", false)
 			.order("created_at", { ascending: false });
 
 		setBorrowList(data ?? []);
@@ -49,23 +113,6 @@ export default function NoteFriend() {
 			.eq("friend_id", user!.id)
 			.eq("isPaid", false);
 		setReturnList(data ?? []);
-	};
-
-	const paidReturn = async (noteId: string) => {
-		setIsPaidReturnLoading(true);
-		await supabase
-			.from("notes")
-			.update([
-				{
-					isPaid: true,
-					paid_at: new Date(),
-				},
-			])
-			.eq("id", noteId);
-		setTimeout(() => {
-			setIsPaidReturnLoading(false);
-			getBorrowNotes();
-		}, 1000);
 	};
 
 	useEffect(() => {
@@ -109,14 +156,79 @@ export default function NoteFriend() {
 									</Label>
 								</div>
 								<div className="w-fit">
-									<Button
-										type="button"
-										variant={"default"}
-										disabled={isPaidReturnLoading}
-										onClick={() => paidReturn(borrow.id)}
-									>
-										{isPaidReturnLoading && <Loader2Icon className="animate-spin" />} คืน
-									</Button>
+									{borrow.isPaid ? (
+										<Link to={`/note/payslip/${borrow.id}`}>
+											<img
+												src={borrow.pay_slip}
+												alt="pay_slip"
+												className="max-w-[150px] shadow-md"
+											/>
+											<p className="text-center">
+												<small>คลิกเพื่อดูรูปเต็ม</small>
+											</p>
+										</Link>
+									) : (
+										<Drawer onClose={() => form.setValue("noteId", "")}>
+											<DrawerTrigger asChild>
+												<Button
+													type="button"
+													onClick={() => form.setValue("noteId", borrow.id)}
+												>
+													คืน
+												</Button>
+											</DrawerTrigger>
+											<DrawerContent>
+												<Form {...form}>
+													<form onSubmit={form.handleSubmit(onSubmit)}>
+														<DrawerHeader>
+															<DrawerTitle>อัปโหลดสลิป</DrawerTitle>
+															<DrawerDescription>
+																แนบสลิปเพื่อยืนยันว่าคืนค่า {borrow.note} แล้วนะ
+															</DrawerDescription>
+
+															<FormField
+																control={form.control}
+																name="paySlip"
+																render={({ field }) => (
+																	<FormItem className="text-left">
+																		<FormLabel>เลือก</FormLabel>
+																		<FormControl>
+																			<Input
+																				type="file"
+																				accept="image/*"
+																				onChange={(e) =>
+																					field.onChange(e.target.files?.[0])
+																				}
+																				onBlur={field.onBlur}
+																			/>
+																		</FormControl>
+																		<FormMessage />
+																	</FormItem>
+																)}
+															/>
+														</DrawerHeader>
+
+														<DrawerFooter>
+															<Button type="submit" disabled={isPaidReturnLoading}>
+																{isPaidReturnLoading && (
+																	<Loader2Icon className="animate-spin" />
+																)}
+																ตกลง
+															</Button>
+															<DrawerClose asChild>
+																<Button
+																	variant="outline"
+																	disabled={isPaidReturnLoading}
+																>
+																	ปิด
+																</Button>
+															</DrawerClose>
+														</DrawerFooter>
+													</form>
+												</Form>
+											</DrawerContent>
+										</Drawer>
+									)}
 								</div>
 							</AccordionContent>
 						</AccordionItem>
