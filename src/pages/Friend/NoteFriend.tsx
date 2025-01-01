@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
-import { Calendar1Icon, CoinsIcon, FolderOpenIcon, HandCoinsIcon, Loader2Icon } from "lucide-react";
+import { Calendar1Icon, CalendarDaysIcon, CoinsIcon, FolderOpenIcon, HandCoinsIcon, Loader2Icon } from "lucide-react";
 import {
 	Table,
 	TableBody,
@@ -37,6 +37,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function NoteFriend() {
 	const { getUserById, user: friendUser } = useUser();
@@ -95,15 +97,27 @@ export default function NoteFriend() {
 		}, 1000);
 	};
 
-	const getBorrowNotes = async () => {
+	const getBorrowNotes = async (onlyUnPaid: boolean = false) => {
 		const { data } = await supabase
 			.from("notes")
 			.select("*, users:friend_id (name, image_profile), note_categories:category_id (name)")
 			.eq("user_id", user!.id)
 			.eq("friend_id", params.friendId)
+			.gte(
+				"created_at",
+				`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, "0")}-01`
+			)
+			.lt(
+				"created_at",
+				`${new Date().getFullYear()}-${(new Date().getMonth() + 2).toString().padStart(2, "0")}-01`
+			)
 			.order("created_at", { ascending: false });
 
-		setBorrowList(data ?? []);
+		if (!onlyUnPaid) {
+			setBorrowList(data?.filter((item) => item.isPaid === false) ?? []);
+		} else {
+			setBorrowList(data?.filter((item) => item.isPaid === true) ?? []);
+		}
 	};
 
 	const getWaitingReturn = async () => {
@@ -121,16 +135,54 @@ export default function NoteFriend() {
 		getWaitingReturn();
 	}, []);
 
+	const thaiMonths = [
+		"มกราคม",
+		"กุมภาพันธ์",
+		"มีนาคม",
+		"เมษายน",
+		"พฤษภาคม",
+		"มิถุนายน",
+		"กรกฎาคม",
+		"สิงหาคม",
+		"กันยายน",
+		"ตุลาคม",
+		"พฤศจิกายน",
+		"ธันวาคม",
+	];
+
 	return (
 		<MainLayout>
 			<PageTitle title={friendUser.name} />
+			<Alert className="mb-4">
+				<CalendarDaysIcon className="w-4 h-4" />
+				<AlertTitle>รายการของเดือน</AlertTitle>
+				<AlertDescription>
+					{thaiMonths[new Date().getMonth()]}/{new Date().getFullYear() + 543}
+				</AlertDescription>
+			</Alert>
 
-			<h1 className="text-xl text-red-500 font-medium">ที่ยืม</h1>
+			<div className="flex justify-between items-center">
+				<div>
+					<h1 className="text-2xl font-medium text-red-500">ที่ยืม</h1>
+				</div>
+				<div className="flex items-center space-x-2">
+					<Label htmlFor="viewReturnList" className="text-xs">
+						คืนแล้ว
+					</Label>
+					<Switch id="viewReturnList" onCheckedChange={(val: boolean) => getBorrowNotes(val)} />
+				</div>
+			</div>
+
 			{borrowList.length > 0 ? (
 				borrowList.map((borrow) => (
 					<Accordion type="single" collapsible key={borrow.id}>
 						<AccordionItem value={borrow.id}>
-							<AccordionTrigger>{borrow.note}</AccordionTrigger>
+							<AccordionTrigger>
+								<span className="flex items-center gap-2">
+									{!borrow.isPaid && <div className="w-2 h-2 bg-red-500 rounded-full"></div>}
+									{borrow.note}
+								</span>
+							</AccordionTrigger>
 							<AccordionContent className="flex justify-between gap-5">
 								<div className="space-y-2">
 									<Label className="flex items-center gap-1">
