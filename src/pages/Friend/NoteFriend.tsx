@@ -10,22 +10,15 @@ import { Label } from "@/components/ui/label";
 import {
 	Calendar1Icon,
 	CalendarDaysIcon,
+	CheckIcon,
 	CoinsIcon,
 	FolderOpenIcon,
 	HandCoinsIcon,
 	ImageIcon,
 	Loader2Icon,
+	XIcon,
 } from "lucide-react";
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableFooter,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, uploadPaySlip } from "@/utils/transaction";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -132,8 +125,7 @@ export default function NoteFriend() {
 		const { data } = await supabase
 			.from("notes")
 			.select("*, users:friend_id (name, image_profile), note_categories:category_id (name)")
-			.eq("friend_id", user!.id)
-			.eq("isPaid", false);
+			.eq("friend_id", user!.id);
 		setReturnList(data ?? []);
 	};
 
@@ -171,7 +163,7 @@ export default function NoteFriend() {
 
 			<div className="flex justify-between items-center">
 				<div>
-					<h1 className="text-2xl font-medium text-red-500">ที่ยืม</h1>
+					<h1 className="text-2xl font-medium text-red-600">ที่ยืม</h1>
 				</div>
 				<div className="flex items-center space-x-2">
 					<Label htmlFor="viewReturnList" className="text-xs">
@@ -301,15 +293,14 @@ export default function NoteFriend() {
 			)}
 
 			<section className="mt-10">
-				<h1 className="text-xl text-green-500 font-medium">รอคืน</h1>
+				<h1 className="text-2xl text-green-600 font-medium">ให้ยืม</h1>
 				{returnList.length > 0 ? (
 					<Table>
-						<TableCaption>รายการที่รอได้คืน</TableCaption>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="w-[100px]">วันที่</TableHead>
+								<TableHead>วันที่</TableHead>
 								<TableHead>รายการ</TableHead>
-								<TableHead className="text-right">จำนวน</TableHead>
+								<TableHead>จำนวน</TableHead>
 								<TableHead>สถานะ</TableHead>
 								<TableHead>สลิป</TableHead>
 							</TableRow>
@@ -320,20 +311,95 @@ export default function NoteFriend() {
 									<TableCell>{list.date}</TableCell>
 									<TableCell>{list.note}</TableCell>
 									<TableCell className="text-right">{formatCurrency(list.amount)}</TableCell>
-									<TableCell>{list.isPaid ? "คืนแล้ว" : "ยังไม่คืน"}</TableCell>
 									<TableCell>
-										<Link to={`/note/payslip/${list.id}`} target="_blank">
-											<ImageIcon />
-										</Link>
+										{list.isPaid ? (
+											<CheckIcon className="text-green-600" />
+										) : (
+											<XIcon className="text-red-600" />
+										)}
+									</TableCell>
+									<TableCell>
+										{list.isPaid ? (
+											<Link to={`/note/payslip/${list.id}`} target="_blank">
+												<ImageIcon />
+											</Link>
+										) : (
+											<Drawer onClose={() => form.setValue("noteId", "")}>
+												<DrawerTrigger asChild>
+													<Button
+														type="button"
+														onClick={() => form.setValue("noteId", list.id)}
+													>
+														คืน
+													</Button>
+												</DrawerTrigger>
+												<DrawerContent>
+													<Form {...form}>
+														<form onSubmit={form.handleSubmit(onSubmit)}>
+															<DrawerHeader>
+																<DrawerTitle>อัปโหลดสลิป</DrawerTitle>
+																<DrawerDescription>
+																	แนบสลิปเพื่อยืนยันว่าคืนค่า {list.note} แล้วนะ
+																</DrawerDescription>
+
+																<FormField
+																	control={form.control}
+																	name="paySlip"
+																	render={({ field }) => (
+																		<FormItem className="text-left">
+																			<FormLabel>เลือก</FormLabel>
+																			<FormControl>
+																				<Input
+																					type="file"
+																					accept="image/*"
+																					onChange={(e) =>
+																						field.onChange(
+																							e.target.files?.[0]
+																						)
+																					}
+																					onBlur={field.onBlur}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+															</DrawerHeader>
+
+															<DrawerFooter>
+																<Button type="submit" disabled={isPaidReturnLoading}>
+																	{isPaidReturnLoading && (
+																		<Loader2Icon className="animate-spin" />
+																	)}
+																	ตกลง
+																</Button>
+																<DrawerClose asChild>
+																	<Button
+																		variant="outline"
+																		disabled={isPaidReturnLoading}
+																	>
+																		ปิด
+																	</Button>
+																</DrawerClose>
+															</DrawerFooter>
+														</form>
+													</Form>
+												</DrawerContent>
+											</Drawer>
+										)}
 									</TableCell>
 								</TableRow>
 							))}
 						</TableBody>
 						<TableFooter>
 							<TableRow>
-								<TableCell colSpan={3}>รวม</TableCell>
+								<TableCell colSpan={4}>รวม</TableCell>
 								<TableCell className="text-right">
-									{formatCurrency(returnList.reduce((sum, item) => sum + item.amount, 0))}
+									{formatCurrency(
+										returnList
+											.filter((l) => l.isPaid === false)
+											.reduce((sum, item) => sum + item.amount, 0)
+									)}
 								</TableCell>
 							</TableRow>
 						</TableFooter>

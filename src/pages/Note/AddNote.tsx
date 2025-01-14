@@ -31,6 +31,7 @@ export default function AddNote() {
 
 	const floatRegex = /^-?\d+(\.\d+)?$/;
 	const formSchema = z.object({
+		isBorrower: z.string().default("isBorrower"),
 		friendId: z.string({ message: "เลือกเพื่อนด้วย" }).min(3, "เลือกเพื่อนด้วย"),
 		date: z.string({ message: "ระบุวันที่ด้วย" }),
 		amount: z.string({ message: "ระบุจำนวนด้วย" }).min(1, "ระบุจำนวนด้วย").max(7).regex(floatRegex, {
@@ -43,6 +44,7 @@ export default function AddNote() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
+			isBorrower: "isBorrower",
 			friendId: "",
 			date: "",
 			amount: "",
@@ -52,12 +54,15 @@ export default function AddNote() {
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		const { amount, date, friendId, note, categoryId } = values;
+		const { amount, date, friendId, note, categoryId, isBorrower } = values;
+		const borrower = isBorrower === "isBorrower" ? user!.id : friendId;
+		const borrowerFrom = isBorrower === "isBorrower" ? friendId : user!.id;
+
 		setIsLoading(true);
 		try {
 			await supabase
 				.from("notes")
-				.insert({ amount, date, friend_id: friendId, note, category_id: categoryId, user_id: user!.id });
+				.insert({ amount, date, friend_id: borrowerFrom, note, category_id: categoryId, user_id: borrower });
 			toast({ title: "เย้!", description: "บันทึกโน๊ตใหม่เรียบร้อย" });
 			setTimeout(() => {
 				navigate(`/friend/${friendId}`);
@@ -82,6 +87,37 @@ export default function AddNote() {
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<CardContent className="space-y-6">
+							<FormField
+								control={form.control}
+								name="isBorrower"
+								render={({ field }) => (
+									<FormItem className="space-y-3">
+										<FormLabel>ฉันคือคนที่</FormLabel>
+										<FormControl>
+											<RadioGroup
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+												className="flex flex-col space-y-1"
+											>
+												<FormItem className="flex items-center space-x-3 space-y-0" key={1}>
+													<FormControl>
+														<RadioGroupItem value={"isBorrower"} />
+													</FormControl>
+													<FormLabel className="font-normal">ยืม</FormLabel>
+												</FormItem>
+												<FormItem className="flex items-center space-x-3 space-y-0" key={2}>
+													<FormControl>
+														<RadioGroupItem value={"isNotBorrower"} />
+													</FormControl>
+													<FormLabel className="font-normal">ให้ยืม</FormLabel>
+												</FormItem>
+											</RadioGroup>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
 							<FormField
 								control={form.control}
 								name="friendId"
@@ -153,7 +189,6 @@ export default function AddNote() {
 									</FormItem>
 								)}
 							/>
-
 							<FormField
 								control={form.control}
 								name="amount"
@@ -167,7 +202,6 @@ export default function AddNote() {
 									</FormItem>
 								)}
 							/>
-
 							<FormField
 								control={form.control}
 								name="categoryId"
@@ -197,7 +231,6 @@ export default function AddNote() {
 									</FormItem>
 								)}
 							/>
-
 							<FormField
 								control={form.control}
 								name="note"
