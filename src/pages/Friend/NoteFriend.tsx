@@ -7,7 +7,15 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
-import { Calendar1Icon, CalendarDaysIcon, CoinsIcon, FolderOpenIcon, HandCoinsIcon, Loader2Icon } from "lucide-react";
+import {
+	Calendar1Icon,
+	CalendarDaysIcon,
+	CoinsIcon,
+	FolderOpenIcon,
+	HandCoinsIcon,
+	ImageIcon,
+	Loader2Icon,
+} from "lucide-react";
 import {
 	Table,
 	TableBody,
@@ -303,6 +311,7 @@ export default function NoteFriend() {
 								<TableHead>รายการ</TableHead>
 								<TableHead className="text-right">จำนวน</TableHead>
 								<TableHead>สถานะ</TableHead>
+								<TableHead>สลิป</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -312,6 +321,11 @@ export default function NoteFriend() {
 									<TableCell>{list.note}</TableCell>
 									<TableCell className="text-right">{formatCurrency(list.amount)}</TableCell>
 									<TableCell>{list.isPaid ? "คืนแล้ว" : "ยังไม่คืน"}</TableCell>
+									<TableCell>
+										<Link to={`/note/payslip/${list.id}`} target="_blank">
+											<ImageIcon />
+										</Link>
+									</TableCell>
 								</TableRow>
 							))}
 						</TableBody>
