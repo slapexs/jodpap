@@ -9,7 +9,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Label } from "@/components/ui/label";
 import {
 	Calendar1Icon,
-	CalendarDaysIcon,
 	CheckIcon,
 	CoinsIcon,
 	FolderOpenIcon,
@@ -39,14 +38,14 @@ import { toast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ITransaction } from "@/types/transaction";
 
 export default function NoteFriend() {
 	const { getUserById, user: friendUser } = useUser();
 	const { user } = useAuth();
 	const params = useParams();
-	const [borrowList, setBorrowList] = useState<any[]>([]);
-	const [returnList, setReturnList] = useState<any[]>([]);
+	const [borrowList, setBorrowList] = useState<ITransaction[]>([]);
+	const [returnList, setReturnList] = useState<ITransaction[]>([]);
 
 	const [isPaidReturnLoading, setIsPaidReturnLoading] = useState<boolean>(false);
 	const formSchema = z.object({
@@ -104,14 +103,6 @@ export default function NoteFriend() {
 			.select("*, users:friend_id (name, image_profile), note_categories:category_id (name)")
 			.eq("user_id", user!.id)
 			.eq("friend_id", params.friendId)
-			.gte(
-				"created_at",
-				`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, "0")}-01`
-			)
-			.lt(
-				"created_at",
-				`${new Date().getFullYear()}-${(new Date().getMonth() + 2).toString().padStart(2, "0")}-01`
-			)
 			.order("created_at", { ascending: false });
 
 		if (!onlyUnPaid) {
@@ -135,31 +126,9 @@ export default function NoteFriend() {
 		getWaitingReturn();
 	}, []);
 
-	const thaiMonths = [
-		"มกราคม",
-		"กุมภาพันธ์",
-		"มีนาคม",
-		"เมษายน",
-		"พฤษภาคม",
-		"มิถุนายน",
-		"กรกฎาคม",
-		"สิงหาคม",
-		"กันยายน",
-		"ตุลาคม",
-		"พฤศจิกายน",
-		"ธันวาคม",
-	];
-
 	return (
 		<MainLayout>
 			<PageTitle title={friendUser.name} />
-			<Alert className="mb-4">
-				<CalendarDaysIcon className="w-4 h-4" />
-				<AlertTitle>รายการของเดือน</AlertTitle>
-				<AlertDescription>
-					{thaiMonths[new Date().getMonth()]}/{new Date().getFullYear() + 543}
-				</AlertDescription>
-			</Alert>
 
 			<div className="flex justify-between items-center">
 				<div>
