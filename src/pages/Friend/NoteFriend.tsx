@@ -116,7 +116,8 @@ export default function NoteFriend() {
 		const { data } = await supabase
 			.from("notes")
 			.select("*, users:friend_id (name, image_profile), note_categories:category_id (name)")
-			.eq("friend_id", user!.id);
+			.eq("friend_id", user!.id)
+			.eq("user_id", params.friendId);
 		setReturnList(data ?? []);
 	};
 
